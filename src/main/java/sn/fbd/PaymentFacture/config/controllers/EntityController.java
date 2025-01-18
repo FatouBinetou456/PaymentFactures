@@ -1,74 +1,45 @@
 package sn.fbd.PaymentFacture.config.controllers;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import sn.fbd.PaymentFacture.Agency;
-import sn.fbd.PaymentFacture.EntitiesData;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import sn.fbd.PaymentFacture.*;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 //@RequestMapping("/")
 public class EntityController {
 
-    @RequestMapping("/Senelec")
-    public String Senelec(Model model) {
 
-        List<String> snlcAg = new ArrayList<>();
+    private final ServiceRepository serviceRepository;
 
-        // Iterate over the entities and add their names to the list
-        for (Agency agency : EntitiesData.senelec.getAgencies()) {
-            snlcAg.add(agency.getLocation());
+    @Autowired
+    public EntityController(ServiceRepository serviceRepository) {
+        this.serviceRepository = serviceRepository;
+    }
+
+    @GetMapping("/{entityName}")
+    public String getEntityDetails(@PathVariable String entityName, Model model) {
+        // Récupérer l'entité depuis la base de données
+        BusinessService entity = serviceRepository.findByServiceName(entityName);
+
+        if (entity == null) {
+            model.addAttribute("error", "Oups!! Le service que vous souhaitez visiter n'est pas disponible");
+            return "ErrorPage";
         }
 
-        model.addAttribute("myEntity", "Senelec");
-        model.addAttribute("myAgencies", snlcAg);
+        // Extraire les noms des agences
+        List<String> agencyNames = entity.getAgencies().stream()
+                .map(Agency::getLocation)
+                .collect(Collectors.toList());
+
+        model.addAttribute("myEntity", entity.getServiceName());
+        model.addAttribute("myAgencies", agencyNames);
         return "EntityPage";
     }
 
-    @RequestMapping("/SenEau")
-    public String SenEau(Model model) {
 
-        List<String> snEauAg = new ArrayList<>();
-
-        // Iterate over the entities and add their names to the list
-        for (Agency agency : EntitiesData.senEau.getAgencies()) {
-            snEauAg.add(agency.getLocation());
-        }
-
-        model.addAttribute("myEntity", "SenEau");
-        model.addAttribute("myAgencies", snEauAg);
-        return "EntityPage";
-    }
-
-
-    @RequestMapping("/Orange")
-    public String Orange(Model model) {
-
-        List<String> orngAg = new ArrayList<>();
-
-        // Iterate over the entities and add their names to the list
-        for (Agency agency : EntitiesData.orange.getAgencies()) {
-            orngAg.add(agency.getLocation());
-        }
-
-        model.addAttribute("myEntity", "Orange");
-        model.addAttribute("myAgencies", orngAg);
-        return "EntityPage";
-    }
-    @RequestMapping("/FBank")
-    public String FBank(Model model) {
-
-        List<String> fbnkAg = new ArrayList<>();
-
-        // Iterate over the entities and add their names to the list
-        for (Agency agency : EntitiesData.fBank.getAgencies()) {
-            fbnkAg.add(agency.getLocation());
-        }
-
-        model.addAttribute("myEntity", "FBank");
-        model.addAttribute("myAgencies", fbnkAg);
-        return "EntityPage";
-    }
 }

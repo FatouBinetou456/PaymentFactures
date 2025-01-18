@@ -1,34 +1,106 @@
 package sn.fbd.PaymentFacture;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
+@Service
 public class QueueManager {
 
-    // Map associant les agences à leur numéro en cours de traitement
-    private static final Map<String, Integer> currentNumberMap = new HashMap<>();
+    private final TicketRepository ticketRepository;
+    private final AgencyRepository agencyRepository;
 
-    // Initialisation des files d’attente pour les agences
-    static {
-        currentNumberMap.put("Senelec", 1);
-        currentNumberMap.put("Orange", 1);
-        currentNumberMap.put("SenEau", 1);
-        currentNumberMap.put("FBank", 1);
+    @Autowired
+    public QueueManager(TicketRepository ticketRepository, AgencyRepository agencyRepository) {
+        this.ticketRepository = ticketRepository;
+        this.agencyRepository = agencyRepository;
     }
 
-    // Récupérer le numéro en cours pour une agence
-    public static int getCurrentNumber(String agencyName) {
-        return currentNumberMap.getOrDefault(agencyName, 1);
+
+    public void nextClient(String businessService,String agencyName) {
+        Optional<Agency> agencyOpt = agencyRepository.findByLocation(agencyName);
+
+        if (agencyOpt.isPresent()) {
+            Agency agency = agencyOpt.get();
+            Ticket ticket = ticketRepository.findTicketByAgency(agency);
+
+            if (ticket != null) {
+                ticket.setCurrentNumber(ticket.getCurrentNumber() + 1);
+                if (ticket.getRegisterNumber()==agency.getNumbRegisters()){
+                    ticket.setRegisterNumber(1);
+
+                }
+                else {
+                    ticket.setRegisterNumber(ticket.getRegisterNumber()+1);
+                }
+                ticketRepository.save(ticket);
+            } else {
+                throw new IllegalStateException("No ticket found for agency: " + agencyName);
+            }
+        } else {
+            throw new IllegalStateException("No agency found with name: " + agencyName);
+        }
+    }
+    public void previousClient(String businessService, String agencyName) {
+        Optional<Agency> agencyOpt = agencyRepository.findByLocation(agencyName);
+
+        if (agencyOpt.isPresent()) {
+            Agency agency = agencyOpt.get();
+            Ticket ticket = ticketRepository.findTicketByAgency(agency);
+
+            if (ticket != null) {
+                if (ticket.getCurrentNumber() > 100) {
+                    ticket.setCurrentNumber(ticket.getCurrentNumber() - 1);
+                    if (ticket.getRegisterNumber()==agency.getNumbRegisters()){
+                        ticket.setRegisterNumber(1);
+
+                    }
+                    else {
+                        ticket.setRegisterNumber(ticket.getRegisterNumber()+1);
+                    }
+                    ticketRepository.save(ticket);
+                }
+            } else {
+                throw new IllegalStateException("No ticket found for agency: " + agencyName);
+            }
+        } else {
+            throw new IllegalStateException("No agency found with name: " + agencyName);
+        }
     }
 
-    // Passer au client suivant
-    public static void nextClient(String agencyName) {
-        currentNumberMap.put(agencyName, currentNumberMap.getOrDefault(agencyName, 1) + 1);
+
+    public int getCurrentNumber(String businessService, String agencyName) {
+        Optional<Agency> agencyOpt = agencyRepository.findByLocation(agencyName);
+
+        if (agencyOpt.isPresent()) {
+            Agency agency = agencyOpt.get();
+            Ticket ticket = ticketRepository.findTicketByAgency(agency);
+
+            if (ticket != null) {
+                return ticket.getCurrentNumber();
+            } else {
+                throw new IllegalStateException("No ticket found for agency: " + agencyName);
+            }
+        } else {
+            throw new IllegalStateException("No agency found with name: " + agencyName);
+        }
     }
 
-    // Revenir au client précédent
-    public static void previousClient(String agencyName) {
-        currentNumberMap.put(agencyName, Math.max(1, currentNumberMap.getOrDefault(agencyName, 1) - 1));
-    }
+    public int getLastRegisterNumber(String businessService, String agencyName) {
+        Optional<Agency> agencyOpt = agencyRepository.findByLocation(agencyName);
 
+        if (agencyOpt.isPresent()) {
+            Agency agency = agencyOpt.get();
+            Ticket ticket = ticketRepository.findTicketByAgency(agency);
+
+            if (ticket != null) {
+                return ticket.getRegisterNumber();
+            } else {
+                throw new IllegalStateException("No ticket found for agency: " + agencyName);
+            }
+        } else {
+            throw new IllegalStateException("No agency found with name: " + agencyName);
+        }
+    }
 }

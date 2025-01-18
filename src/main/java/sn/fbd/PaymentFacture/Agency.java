@@ -1,12 +1,28 @@
 package sn.fbd.PaymentFacture;
 
+
+import jakarta.persistence.*;
+
+@Entity
 public class Agency {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long agencyId ;
     private String location ;
     private int numbRegisters ;
+    @ManyToOne
+    @JoinColumn(name="serviceId")
+    private BusinessService businessService;
 
-    public Agency(Long agencyId, String location, int numbRegisters) {
-        this.agencyId = agencyId;
+    @OneToOne(mappedBy = "agency", cascade = CascadeType.ALL)
+    private Ticket ticket ;
+
+    public Agency() {}
+
+    public Agency( String location, int numbRegisters, BusinessService businessService) {
+
+        this.businessService = businessService;
         this.location = location;
         this.numbRegisters = numbRegisters;
     }
@@ -21,6 +37,14 @@ public class Agency {
     }
 
 
+    public Ticket getTicket() {
+        return ticket;
+    }
+
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
+        ticket.setAgency(this);
+    }
 
     public String getLocation() {
         return location;
@@ -36,5 +60,13 @@ public class Agency {
 
     public void setNumbRegisters(int numbRegisters) {
         this.numbRegisters = numbRegisters;
+    }
+
+    public BusinessService getBusinessService() {
+        return businessService;
+    }
+
+    public void setBusinessService(BusinessService businessService) {
+        this.businessService = businessService;
     }
 }

@@ -43,7 +43,7 @@
 </head>
 <body>
 <h1>Interface Agent - Agence ${agencyName} de ${entityName}</h1>
-<p class="counter">Numéro en cours : ${currentNumber}</p>
+<p class="counter">Numéro en cours : ${currentNumber} a la caisse ${registerNumber}</p>
 
 <div class="controls">
     <form action="/agent/${entityName}/${agencyName}/previous" method="post" style="display: inline;">

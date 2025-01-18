@@ -1,44 +1,45 @@
 package sn.fbd.PaymentFacture.config.controllers;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
 import sn.fbd.PaymentFacture.QueueManager;
 
 @Controller
 @RequestMapping("/agent")
-
 public class AgentController {
 
-    // Afficher l'interface de l'agent pour une agence
+    private final QueueManager queueManager;
+
+    @Autowired
+    public AgentController(QueueManager queueManager) {
+        this.queueManager = queueManager;
+    }
+
     @GetMapping("/{entityName}/{agencyName}")
     public String agentInterface(@PathVariable String entityName, @PathVariable String agencyName, Model model) {
-        // Récupérer le numéro en cours pour l'agence
-        int currentNumber = QueueManager.getCurrentNumber(agencyName);
-
-        // Ajouter les détails au modèle
+        int currentNumber = queueManager.getCurrentNumber(entityName,agencyName);
+        int registerNumber= queueManager.getLastRegisterNumber(entityName,agencyName);
         model.addAttribute("entityName", entityName);
         model.addAttribute("agencyName", agencyName);
         model.addAttribute("currentNumber", currentNumber);
+        model.addAttribute("registerNumber", registerNumber);
+        System.out.println("Current Number for " + agencyName + ": " + currentNumber);
 
-        return "AgentInterface"; // Affiche l'interface JSP de l'agent
+        return "AgentInterface";
     }
 
-    // Incrémenter le numéro (Client suivant)
     @PostMapping("/{entityName}/{agencyName}/next")
     public String nextClient(@PathVariable String entityName, @PathVariable String agencyName) {
-        QueueManager.nextClient(agencyName);
+        queueManager.nextClient(entityName,agencyName);
         return "redirect:/agent/" + entityName + "/" + agencyName;
     }
 
-    // Décrémenter le numéro (Client précédent)
     @PostMapping("/{entityName}/{agencyName}/previous")
     public String previousClient(@PathVariable String entityName, @PathVariable String agencyName) {
-        QueueManager.previousClient(agencyName);
+        queueManager.previousClient(entityName,agencyName);
         return "redirect:/agent/" + entityName + "/" + agencyName;
     }
 }

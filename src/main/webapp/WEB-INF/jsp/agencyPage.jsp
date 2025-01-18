@@ -55,6 +55,9 @@
     <p class="queue-info">
         Numéro actuellement traité : <span class="queue-highlight">${currentNumber}</span>
     </p>
+    <p class="queue-info">
+        A la Caisse Numero : <span class="queue-highlight">${register}</span>
+    </p>
 </div>
 
 
