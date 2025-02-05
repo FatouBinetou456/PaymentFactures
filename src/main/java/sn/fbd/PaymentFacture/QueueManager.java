@@ -103,4 +103,21 @@ public class QueueManager {
             throw new IllegalStateException("No agency found with name: " + agencyName);
         }
     }
+
+    public int getLastTicketNumber(String businessService, String agencyName) {
+        Optional<Agency> agencyOpt = agencyRepository.findByLocation(agencyName);
+
+        if (agencyOpt.isPresent()) {
+            Agency agency = agencyOpt.get();
+            Ticket ticket = ticketRepository.findTicketByAgency(agency);
+
+            if (ticket != null) {
+                return ticket.getCurrentNumber() + ticket.getQueueSize();
+            } else {
+                throw new IllegalStateException("No ticket found for agency: " + agencyName);
+            }
+        } else {
+            throw new IllegalStateException("No agency found with name: " + agencyName);
+        }
+    }
 }

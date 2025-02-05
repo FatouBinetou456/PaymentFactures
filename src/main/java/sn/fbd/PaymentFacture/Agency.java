@@ -1,16 +1,21 @@
 package sn.fbd.PaymentFacture;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
-public class Agency {
+public class Agency implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long agencyId ;
     private String location ;
     private int numbRegisters ;
+
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="serviceId")
     private BusinessService businessService;
@@ -61,7 +66,7 @@ public class Agency {
     public void setNumbRegisters(int numbRegisters) {
         this.numbRegisters = numbRegisters;
     }
-
+    @JsonIgnore
     public BusinessService getBusinessService() {
         return businessService;
     }

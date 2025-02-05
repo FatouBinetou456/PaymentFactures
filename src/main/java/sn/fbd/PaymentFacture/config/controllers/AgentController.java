@@ -1,14 +1,14 @@
 package sn.fbd.PaymentFacture.config.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import sn.fbd.PaymentFacture.QueueManager;
 
-@Controller
-@RequestMapping("/agent")
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/agent")
 public class AgentController {
 
     private final QueueManager queueManager;
@@ -19,27 +19,28 @@ public class AgentController {
     }
 
     @GetMapping("/{entityName}/{agencyName}")
-    public String agentInterface(@PathVariable String entityName, @PathVariable String agencyName, Model model) {
-        int currentNumber = queueManager.getCurrentNumber(entityName,agencyName);
-        int registerNumber= queueManager.getLastRegisterNumber(entityName,agencyName);
-        model.addAttribute("entityName", entityName);
-        model.addAttribute("agencyName", agencyName);
-        model.addAttribute("currentNumber", currentNumber);
-        model.addAttribute("registerNumber", registerNumber);
-        System.out.println("Current Number for " + agencyName + ": " + currentNumber);
+    public Map<String, Object> agentInterface(@PathVariable String entityName, @PathVariable String agencyName) {
+        int currentNumber = queueManager.getCurrentNumber(entityName, agencyName);
+        int registerNumber = queueManager.getLastRegisterNumber(entityName, agencyName);
+        int lastTicketNumber = queueManager.getLastTicketNumber(entityName, agencyName);
 
-        return "AgentInterface";
+        Map<String, Object> response = new HashMap<>();
+        response.put("entityName", entityName);
+        response.put("agencyName", agencyName);
+        response.put("currentNumber", currentNumber);
+        response.put("registerNumber", registerNumber);
+        response.put("lastTicketNumber", lastTicketNumber);
+
+        return response;
     }
 
     @PostMapping("/{entityName}/{agencyName}/next")
-    public String nextClient(@PathVariable String entityName, @PathVariable String agencyName) {
-        queueManager.nextClient(entityName,agencyName);
-        return "redirect:/agent/" + entityName + "/" + agencyName;
+    public void nextClient(@PathVariable String entityName, @PathVariable String agencyName) {
+        queueManager.nextClient(entityName, agencyName);
     }
 
     @PostMapping("/{entityName}/{agencyName}/previous")
-    public String previousClient(@PathVariable String entityName, @PathVariable String agencyName) {
-        queueManager.previousClient(entityName,agencyName);
-        return "redirect:/agent/" + entityName + "/" + agencyName;
+    public void previousClient(@PathVariable String entityName, @PathVariable String agencyName) {
+        queueManager.previousClient(entityName, agencyName);
     }
 }

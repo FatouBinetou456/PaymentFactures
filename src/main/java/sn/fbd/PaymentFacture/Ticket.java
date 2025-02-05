@@ -1,9 +1,12 @@
 package sn.fbd.PaymentFacture;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
-public class Ticket {
+public class Ticket implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -11,6 +14,7 @@ public class Ticket {
 
     @OneToOne
     @JoinColumn(name ="agencyId")
+    @JsonIgnore
     private Agency agency;
 
     private int currentNumber;
@@ -44,7 +48,7 @@ public class Ticket {
     public void setCurrentNumber(int currentNumber) {
         this.currentNumber = currentNumber;
     }
-
+    @JsonIgnore
     public Agency getAgency() {
         return agency;
     }

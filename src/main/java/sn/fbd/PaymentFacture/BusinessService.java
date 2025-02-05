@@ -1,10 +1,13 @@
 package sn.fbd.PaymentFacture;
 
+import java.io.Serializable;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
-public class BusinessService {
+public class BusinessService implements Serializable {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long serviceId;
