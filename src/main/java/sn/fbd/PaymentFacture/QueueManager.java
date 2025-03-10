@@ -27,6 +27,7 @@ public class QueueManager {
 
             if (ticket != null) {
                 ticket.setCurrentNumber(ticket.getCurrentNumber() + 1);
+                ticket.setQueueSize(ticket.getQueueSize() - 1);
                 if (ticket.getRegisterNumber()==agency.getNumbRegisters()){
                     ticket.setRegisterNumber(1);
 
@@ -52,6 +53,8 @@ public class QueueManager {
             if (ticket != null) {
                 if (ticket.getCurrentNumber() > 100) {
                     ticket.setCurrentNumber(ticket.getCurrentNumber() - 1);
+                    ticket.setQueueSize(ticket.getQueueSize() - 1);
+
                     if (ticket.getRegisterNumber()==agency.getNumbRegisters()){
                         ticket.setRegisterNumber(1);
 
@@ -113,6 +116,27 @@ public class QueueManager {
 
             if (ticket != null) {
                 return ticket.getCurrentNumber() + ticket.getQueueSize();
+            } else {
+                throw new IllegalStateException("No ticket found for agency: " + agencyName);
+            }
+        } else {
+            throw new IllegalStateException("No agency found with name: " + agencyName);
+        }
+    }
+
+    public void issueNewTicket(String businessService, String agencyName) {
+        Optional<Agency> agencyOpt = agencyRepository.findByLocation(agencyName);
+
+        if (agencyOpt.isPresent()) {
+            Agency agency = agencyOpt.get();
+            Ticket ticket = ticketRepository.findTicketByAgency(agency);
+
+            if (ticket != null) {
+                // Incrémente la taille de la file pour set le numero de ticket attribué
+                ticket.setQueueSize(ticket.getQueueSize() + 1);
+
+                // Sauvegarde les modifications
+                ticketRepository.save(ticket);
             } else {
                 throw new IllegalStateException("No ticket found for agency: " + agencyName);
             }
